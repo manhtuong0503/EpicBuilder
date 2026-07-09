@@ -2,6 +2,9 @@
 .gradle/
 build/
 
+# Hero portraits are fetched at CI build time, not committed
+app/src/main/assets/portraits/
+
 # Local configuration file (sdk path, etc)
 local.properties
 
