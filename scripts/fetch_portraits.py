@@ -16,6 +16,12 @@ OUT_DIR = os.path.join(ROOT, "app/src/main/assets/portraits")
 # Một số id trong app khác slug trên các trang cộng đồng
 ALIASES = {
     "ainz": ["ainz-ooal-gown", "ainz"],
+    "archdemon-mercedes": [
+        "archdemon-mercedes",
+        "arch-demon-mercedes",
+        "archdemons-shadow-mercedes",
+        "mercedes",
+    ],
 }
 
 SOURCES = [
