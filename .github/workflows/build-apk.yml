@@ -24,6 +24,9 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
+      - name: Fetch hero portraits
+        run: python3 scripts/fetch_portraits.py
+
       - name: Build debug APK
         run: ./gradlew assembleDebug --no-daemon --stacktrace
 

@@ -1,5 +1,6 @@
 package com.epicbuilder.ui.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -27,46 +28,92 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.epicbuilder.data.model.Element
 import com.epicbuilder.data.model.Hero
+import com.epicbuilder.data.model.HeroClass
 import com.epicbuilder.engine.Reason
 import com.epicbuilder.ui.theme.color
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.util.Locale
 
-/** Avatar tròn hiển thị chữ cái đầu, viền màu theo hệ. */
+/**
+ * Avatar tròn: dùng ảnh chân dung trong assets nếu có (đóng gói lúc build CI),
+ * không có thì hiển thị chữ cái đầu. Viền màu theo hệ.
+ */
 @Composable
 fun HeroAvatar(hero: Hero, size: Int = 44) {
-    val initials = hero.name
-        .split(" ")
-        .filter { it.isNotBlank() }
-        .take(2)
-        .joinToString("") { it.first().uppercase() }
-    Box(
-        modifier = Modifier
-            .size(size.dp)
-            .border(2.dp, hero.element.color(), CircleShape)
-            .background(hero.element.color().copy(alpha = 0.18f), CircleShape),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = initials,
-            style = MaterialTheme.typography.labelLarge,
-            fontWeight = FontWeight.Bold,
-            color = hero.element.color()
-        )
+    val context = LocalContext.current
+    val portrait by produceState<ImageBitmap?>(initialValue = null, hero.id) {
+        value = withContext(Dispatchers.IO) { PortraitCache.load(context, hero.id) }
     }
+    val shape = CircleShape
+    val borderModifier = Modifier
+        .size(size.dp)
+        .border(2.dp, hero.element.color(), shape)
+    val bitmap = portrait
+    if (bitmap != null) {
+        Image(
+            bitmap = bitmap,
+            contentDescription = hero.name,
+            contentScale = ContentScale.Crop,
+            modifier = borderModifier.clip(shape)
+        )
+    } else {
+        val initials = hero.name
+            .split(" ")
+            .filter { it.isNotBlank() }
+            .take(2)
+            .joinToString("") { it.first().uppercase() }
+        Box(
+            modifier = borderModifier.background(hero.element.color().copy(alpha = 0.18f), shape),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = initials,
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Bold,
+                color = hero.element.color()
+            )
+        }
+    }
+}
+
+/** Biểu tượng trung tính cho hệ nguyên tố (không dùng asset gốc của game). */
+fun Element.icon(): String = when (this) {
+    Element.FIRE -> "🔥"
+    Element.ICE -> "❄️"
+    Element.EARTH -> "🌿"
+    Element.LIGHT -> "✨"
+    Element.DARK -> "🌙"
+}
+
+/** Biểu tượng trung tính cho class. */
+fun HeroClass.icon(): String = when (this) {
+    HeroClass.KNIGHT -> "🛡"
+    HeroClass.WARRIOR -> "⚔"
+    HeroClass.THIEF -> "🗡"
+    HeroClass.RANGER -> "🏹"
+    HeroClass.MAGE -> "🔮"
+    HeroClass.SOUL_WEAVER -> "💠"
 }
 
 @Composable
 fun ElementBadge(element: Element) {
     Text(
-        text = element.labelVi,
+        text = "${element.icon()} ${element.labelVi}",
         style = MaterialTheme.typography.labelSmall,
         color = element.color(),
         modifier = Modifier
@@ -129,7 +176,7 @@ fun HeroRow(
                 ) {
                     ElementBadge(hero.element)
                     Text(
-                        text = "${hero.heroClass.labelVi} · ${hero.speedTier.labelVi}",
+                        text = "${hero.heroClass.icon()} ${hero.heroClass.labelVi} · ${hero.speedTier.labelVi}",
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -173,7 +220,7 @@ fun SuggestionCard(
                     ) {
                         ElementBadge(hero.element)
                         Text(
-                            text = hero.heroClass.labelVi,
+                            text = "${hero.heroClass.icon()} ${hero.heroClass.labelVi}",
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

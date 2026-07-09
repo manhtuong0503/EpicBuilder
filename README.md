@@ -64,6 +64,17 @@ app/src/main/java/com/epicbuilder/
     └── theme/                 # Material 3 dark theme
 ```
 
+## Ảnh chân dung hero
+
+Khi build bằng GitHub Actions, bước `scripts/fetch_portraits.py` tự tải ảnh
+chân dung hero từ các nguồn cộng đồng vào `app/src/main/assets/portraits/`
+và đóng gói vào APK (app vẫn chạy hoàn toàn offline). Hero nào thiếu ảnh sẽ
+hiển thị avatar chữ cái. Build local không có ảnh cũng không sao — muốn có
+thì chạy `python3 scripts/fetch_portraits.py` trước khi build.
+
+> ⚠️ Ảnh hero là tài sản của Smilegate/Super Creative — chỉ dùng cho mục đích
+> cá nhân/fan-tool, không phân phối thương mại.
+
 ## Ghi chú
 
 Điểm số và các mối quan hệ khắc chế được biên soạn từ meta PvP Epic Seven
